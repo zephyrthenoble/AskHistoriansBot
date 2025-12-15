@@ -36,8 +36,19 @@ class SubmissionIterationMode(Enum):
 def run(mode: str, limit: int | None, subreddit: str, account: str):
     reddit = praw.Reddit(account, user_agent=f"{account} user agent")
     sub = reddit.subreddit(subreddit)
+    archive = reddit.subreddit("AskHistoriansArchive")
     mode_enum = SubmissionIterationMode[mode.upper()]
-    iterate_submissions(mode_enum, sub, limit)
+    for submission in iterate_submissions(mode_enum, sub, limit):
+        submission: praw.models.Submission
+        print(f"Processing submission: {submission.title} (ID: {submission.id})")
+        title = submission.title
+        body = submission.selftext
+        url = submission.url
+        print(f"Title: {title}")
+        print(f"Body: {body}")
+        newbody = f"AskHistoriansArchive Bot post\n\nOriginal post URL: {url}\n\n---\n\n{body}"
+
+        archive.submit(title=title, selftext=newbody)
 
 
 def iterate_submissions(
@@ -59,11 +70,11 @@ def iterate_submissions(
             sub_iter = subreddit.hot(limit=limit)
     if mode == SubmissionIterationMode.STREAM and infinite_stream:
         for submission in sub_iter:
-            print(submission.title)
+            yield submission
     else:
         iter_count = 0
         for submission in sub_iter:
-            print(submission.title)
+            yield submission
             iter_count += 1
             if iter_count >= limit:
                 break
