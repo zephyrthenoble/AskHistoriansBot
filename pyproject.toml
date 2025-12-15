@@ -1,0 +1,10 @@
+[project]
+name = "askhistoriansarchive"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.3.1",
+    "praw>=7.8.1",
+]
